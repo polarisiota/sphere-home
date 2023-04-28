@@ -13,7 +13,7 @@ export class InvoiceService {
     private transactionService: TransactionService,
   ) {}
 
-  async create() {
+  async create(dto: CreateInvoiceDto): Invoice {
     // create invoice from data
     throw 'not implemented';
   }
@@ -26,7 +26,7 @@ export class InvoiceService {
     throw 'not implemented';
   }
 
-  async checkout(invoiceId: number, amount: number, user: User) {
+  async checkout(invoiceId: number, amount: bigint, payer: User) {
     const invoice = await this.retrieve(invoiceId);
     // TODO check amount type
     if (invoice.amount !== amount) {
@@ -35,7 +35,6 @@ export class InvoiceService {
     if (invoice.status !== InvoiceStatus.INITIAL) {
       throw new Error('Invoice was already processed');
     }
-    const payer = await this.userService.retrieve(invoice.payerId);
     const receiver = await this.userService.retrieve(invoice.receiverId);
     if (!payer || !receiver) throw new Error('User not found');
 

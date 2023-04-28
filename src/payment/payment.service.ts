@@ -5,7 +5,7 @@ import { TransactionService } from 'src/transaction/transaction.service';
 @Injectable()
 export class PaymentService {
   constructor(private transactionService: TransactionService) {}
-  async pay(amount: number, payer: User, receiver: User): Promise<Transaction> {
+  async pay(amount: bigint, payer: User, receiver: User): Promise<Transaction> {
     // we can call third party service or access solana chain
     // TODO create transaction from user and amount
 
