@@ -40,7 +40,11 @@ export class InvoiceService {
   }
 
   async retrieve(invoiceId: number): Promise<Invoice> {
-    throw 'not implemented';
+    return await this.prisma.invoice.findFirst({
+      where: {
+        id: invoiceId,
+      },
+    });
   }
 
   async setStatus(invoiceId: number, status: InvoiceStatus): Promise<Invoice> {

@@ -43,13 +43,26 @@ export class InvoiceController {
 
   @Get(':id')
   async retrieve(@Param('id') id: string) {
-    // TODO catch exception
-    const invoiceId = parseInt(id);
+    try {
+      const invoiceId = parseInt(id);
 
-    const invoice = await this.invoiceService.retrieve(invoiceId);
+      const invoice = await this.invoiceService.retrieve(invoiceId);
 
-    // TODO response type
-    return invoice;
+      return {
+        statusCode: 201,
+        status: 'success',
+        data: getReturnableInvoice(invoice),
+        message: null,
+      };
+    } catch (e) {
+      logger.error(`retrieve invoice: ${e}`);
+      return {
+        statuscode: 400,
+        status: 'error',
+        data: null,
+        message: e.message,
+      };
+    }
   }
 
   @Put(':id')
