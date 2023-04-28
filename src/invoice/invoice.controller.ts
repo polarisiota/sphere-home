@@ -14,6 +14,7 @@ import { GetUser } from 'src/auth/decorator';
 import { User } from '@prisma/client';
 import { logger } from 'src/helper/logger.helper';
 import { getReturnableInvoice } from 'src/helper/translate.helper';
+import { InvoiceStatus } from 'src/helper/constants.helper';
 
 @UseGuards(JwtGuard)
 @Controller('invoice')
@@ -71,21 +72,38 @@ export class InvoiceController {
     @Body() dto: UpdateInvoiceDto,
     @GetUser() user: User,
   ) {
-    const invoiceId = parseInt(id);
+    try {
+      const invoiceId = parseInt(id);
 
-    const invoice = await this.invoiceService.retrieve(invoiceId);
+      const invoice = await this.invoiceService.retrieve(invoiceId);
 
-    if (invoice == null) {
-      throw new Error('Invoice not found');
+      if (invoice == null) {
+        throw new Error('Invoice not found');
+      }
+      if (invoice.receiverId !== user.id) {
+        throw new Error('Not authorized');
+      }
+      if (invoice.status !== InvoiceStatus.INITIAL) {
+        throw new Error('Not authorized');
+      }
+      dto.id = invoiceId;
+      const updatedInvoice = await this.invoiceService.update(dto);
+
+      return {
+        statusCode: 200,
+        status: 'success',
+        data: getReturnableInvoice(updatedInvoice),
+        message: null,
+      };
+    } catch (e) {
+      logger.error(`update invoice: ${e}`);
+      return {
+        statuscode: 400,
+        status: 'error',
+        data: null,
+        message: e.message,
+      };
     }
-
-    if (invoice.receiverId !== user.id) {
-      throw new Error('Not authorized');
-    }
-    const updatedInvoice = await this.invoiceService.update(dto);
-
-    // TODo response type
-    return invoice;
   }
 
   @Post(':id')

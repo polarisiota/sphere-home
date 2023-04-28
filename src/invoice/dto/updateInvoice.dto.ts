@@ -1,5 +1,8 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpdateInvoiceDto {
-  payerEmail?: string;
+  @IsOptional()
+  id?: number;
+
+  amount: number;
 }

@@ -52,7 +52,16 @@ export class InvoiceService {
   }
 
   async update(dto: UpdateInvoiceDto): Promise<Invoice> {
-    throw 'not implemented';
+    const invoice = await this.prisma.invoice.update({
+      where: {
+        id: dto.id,
+      },
+      data: {
+        amount: dto.amount,
+      },
+    });
+
+    return invoice;
   }
 
   async checkout(invoiceId: number, amount: bigint, payer: User) {
