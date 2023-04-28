@@ -2,9 +2,12 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { InvoiceModule } from './invoice/invoice.module';
+import { TransactionModule } from './transaction/transaction.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, InvoiceModule, TransactionModule, PaymentModule],
   controllers: [],
   providers: [],
 })
