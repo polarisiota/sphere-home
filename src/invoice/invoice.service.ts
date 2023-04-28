@@ -4,6 +4,7 @@ import { InvoiceStatus } from 'src/helper/constants.helper';
 import { PaymentService } from 'src/payment/payment.service';
 import { TransactionService } from 'src/transaction/transaction.service';
 import { UserService } from 'src/user/user.service';
+import { CreateInvoiceDto, UpdateInvoiceDto } from './dto';
 
 @Injectable()
 export class InvoiceService {
@@ -13,7 +14,7 @@ export class InvoiceService {
     private transactionService: TransactionService,
   ) {}
 
-  async create(dto: CreateInvoiceDto): Invoice {
+  async create(dto: CreateInvoiceDto): Promise<Invoice> {
     // create invoice from data
     throw 'not implemented';
   }
@@ -23,6 +24,10 @@ export class InvoiceService {
   }
 
   async setStatus(invoiceId: number, status: InvoiceStatus): Promise<Invoice> {
+    throw 'not implemented';
+  }
+
+  async update(dto: UpdateInvoiceDto): Promise<Invoice> {
     throw 'not implemented';
   }
 

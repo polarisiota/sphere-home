@@ -1,6 +1,14 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
-import { CreateInvoiceDto } from './dto';
+import { CreateInvoiceDto, UpdateInvoiceDto } from './dto';
 import { JwtGuard } from 'src/auth/guard';
 import { GetUser } from 'src/auth/decorator';
 import { User } from '@prisma/client';
@@ -29,6 +37,29 @@ export class InvoiceController {
     const invoice = await this.invoiceService.retrieve(invoiceId);
 
     // TODO response type
+    return invoice;
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateInvoiceDto,
+    @GetUser() user: User,
+  ) {
+    const invoiceId = parseInt(id);
+
+    const invoice = await this.invoiceService.retrieve(invoiceId);
+
+    if (invoice == null) {
+      throw new Error('Invoice not found');
+    }
+
+    if (invoice.receiverId !== user.id) {
+      throw new Error('Not authorized');
+    }
+    const updatedInvoice = await this.invoiceService.update(dto);
+
+    // TODo response type
     return invoice;
   }
 
