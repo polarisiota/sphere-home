@@ -48,7 +48,14 @@ export class InvoiceService {
   }
 
   async setStatus(invoiceId: number, status: InvoiceStatus): Promise<Invoice> {
-    throw 'not implemented';
+    return await this.prisma.invoice.update({
+      where: {
+        id: invoiceId,
+      },
+      data: {
+        status,
+      },
+    });
   }
 
   async update(dto: UpdateInvoiceDto): Promise<Invoice> {
@@ -64,21 +71,24 @@ export class InvoiceService {
     return invoice;
   }
 
-  async checkout(invoiceId: number, amount: bigint, payer: User) {
+  async checkout(
+    invoiceId: number,
+    amount: bigint,
+    payer: User,
+  ): Promise<Invoice> {
     const invoice = await this.retrieve(invoiceId);
-    // TODO check amount type
-    if (invoice.amount !== amount) {
+    if (Number(invoice.amount) !== Number(amount))
       throw new Error('Amount not matched');
-    }
+
     if (invoice.status !== InvoiceStatus.INITIAL) {
       throw new Error('Invoice was already processed');
     }
+
     const receiver = await this.userService.retrieve(invoice.receiverId);
     if (!payer || !receiver) throw new Error('User not found');
 
-    const transaction = await this.paymentService.pay(amount, payer, receiver);
-    transaction.invoiceId = invoiceId;
-    await this.transactionService.update(transaction);
-    await this.setStatus(invoiceId, InvoiceStatus.PAID);
+    await this.paymentService.pay(amount, payer, receiver, invoiceId);
+
+    return await this.setStatus(invoiceId, InvoiceStatus.PAID);
   }
 }

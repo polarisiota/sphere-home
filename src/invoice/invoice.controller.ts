@@ -108,15 +108,34 @@ export class InvoiceController {
 
   @Post(':id')
   async checkout(@Param('id') id: string, @GetUser() user: User) {
-    const invoiceId = parseInt(id);
+    try {
+      const invoiceId = parseInt(id);
 
-    const invoice = await this.invoiceService.retrieve(invoiceId);
-    // TODO error case when invoice null
+      const invoice = await this.invoiceService.retrieve(invoiceId);
+      if (!invoice) throw new Error('Invoice not exist');
 
-    if (invoice.payerId !== user.id) {
-      throw new Error('Invalid user');
+      if (invoice.payerId !== user.id) throw new Error('Invalid user');
+
+      const updatedInvoice = await this.invoiceService.checkout(
+        invoiceId,
+        invoice.amount,
+        user,
+      );
+
+      return {
+        statusCode: 200,
+        status: 'success',
+        data: getReturnableInvoice(updatedInvoice),
+        message: null,
+      };
+    } catch (e) {
+      logger.error(`checkout invoice: ${e}`);
+      return {
+        statuscode: 400,
+        status: 'error',
+        data: null,
+        message: e.message,
+      };
     }
-    await this.invoiceService.checkout(invoiceId, invoice.amount, user);
-    // TODO if succes, return true, else return false
   }
 }
