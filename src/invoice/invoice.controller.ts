@@ -12,6 +12,8 @@ import { CreateInvoiceDto, UpdateInvoiceDto } from './dto';
 import { JwtGuard } from 'src/auth/guard';
 import { GetUser } from 'src/auth/decorator';
 import { User } from '@prisma/client';
+import { logger } from 'src/helper/logger.helper';
+import { getReturnableInvoice } from 'src/helper/translate.helper';
 
 @UseGuards(JwtGuard)
 @Controller('invoice')
@@ -20,13 +22,23 @@ export class InvoiceController {
 
   @Post()
   async create(@Body() dto: CreateInvoiceDto, @GetUser() user: User) {
-    dto.receiverId = user.id;
-
-    // TODO catch exception
-    const invoice = await this.invoiceService.create(dto);
-
-    // TODO response type for invoice
-    return invoice;
+    try {
+      const invoice = await this.invoiceService.create(dto, user);
+      return {
+        statusCode: 201,
+        status: 'success',
+        data: getReturnableInvoice(invoice),
+        message: null,
+      };
+    } catch (e) {
+      logger.error(`create invoice: ${e}`);
+      return {
+        statuscode: 400,
+        status: 'error',
+        data: null,
+        message: e.message,
+      };
+    }
   }
 
   @Get(':id')

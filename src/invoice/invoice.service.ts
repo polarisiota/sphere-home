@@ -5,6 +5,7 @@ import { PaymentService } from 'src/payment/payment.service';
 import { TransactionService } from 'src/transaction/transaction.service';
 import { UserService } from 'src/user/user.service';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class InvoiceService {
@@ -12,11 +13,30 @@ export class InvoiceService {
     private paymentService: PaymentService,
     private userService: UserService,
     private transactionService: TransactionService,
+    private prisma: PrismaService,
   ) {}
 
-  async create(dto: CreateInvoiceDto): Promise<Invoice> {
-    // create invoice from data
-    throw 'not implemented';
+  async create(dto: CreateInvoiceDto, receiver: User): Promise<Invoice> {
+    const payer = await this.userService.retrieveByEmail(dto.payerEmail);
+
+    const invoice = await this.prisma.invoice.create({
+      data: {
+        amount: dto.amount,
+        status: InvoiceStatus.INITIAL,
+        payer: {
+          connect: {
+            id: payer.id,
+          },
+        },
+        receriver: {
+          connect: {
+            id: receiver.id,
+          },
+        },
+      },
+    });
+
+    return invoice;
   }
 
   async retrieve(invoiceId: number): Promise<Invoice> {
